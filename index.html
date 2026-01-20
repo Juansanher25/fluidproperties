@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mecánica de Fluidos | U. América</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- MathJax Configuration -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    const styles = document.createElement('style');
+                    // Reglas CSS críticas para evitar saltos de línea con fórmulas inline
+                    styles.innerHTML = 'mjx-container { display: inline-block !important; vertical-align: text-bottom !important; margin: 0 !important; } svg { display: inline !important; }';
+                    document.head.appendChild(styles);
+                }
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9;
+            color: #334155;
+            overflow: hidden; 
+            -webkit-font-smoothing: antialiased;
+        }
+        h1, h2, h3, .serif-font { font-family: 'Playfair Display', serif; }
+
+        /* --- EFECTO DE VUELTA DE PÁGINA (BOOK FLIP) --- */
+        #content-perspective {
+            perspective: 2000px;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            position: relative;
+        }
+
+        .tab-panel {
+            display: none;
+            transform-origin: center left;
+            backface-visibility: hidden;
+        }
+
+        .page-turn-enter {
+            display: block;
+            animation: turnPageIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes turnPageIn {
+            0% { opacity: 0; transform: rotateY(-60deg) translateX(-30px); }
+            100% { opacity: 1; transform: rotateY(0deg) translateX(0); }
+        }
+
+        /* --- ESTILOS GENERALES --- */
+        p, li { text-align: left; margin-bottom: 0.6rem; line-height: 1.5; }
+        
+        .math-display {
+            overflow-x: auto; padding: 0.4rem; background-color: #ffffff;
+            border-radius: 0.5rem; border: 1px solid #e2e8f0; margin: 0.4rem 0;
+            text-align: center; font-size: 1rem;
+        }
+
+        .nav-item { position: relative; transition: all 0.2s ease; border-radius: 6px; margin-bottom: 2px; }
+        .nav-item:hover { background-color: #e2e8f0; color: #0f172a; }
+        .nav-item.active { background-color: #2563eb; color: #ffffff; font-weight: 600; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); }
+        
+        .chart-wrapper { position: relative; width: 100%; height: 260px; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 10px; }
+        .expand-btn { position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(255,255,255,0.95); border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.7rem; color: #475569; cursor: pointer; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+        .expand-btn:hover { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
+        
+        .btn-primary { background-color: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s; font-size: 0.9rem; font-weight: 500; }
+        .btn-primary:hover { background-color: #1d4ed8; }
+        
+        figcaption { font-size: 0.75rem; color: #64748b; text-align: center; margin-top: 0.5rem; font-style: italic; }
+        .img-box { height: 200px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; overflow: hidden; padding: 4px; }
+        .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
+
+        details > summary { list-style: none; outline: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        .external-link { display: flex; align-items: center; gap: 8px; color: #2563eb; font-size: 0.85rem; font-weight: 500; text-decoration: none; padding: 4px 0; transition: color 0.2s; }
+        .external-link:hover { color: #1d4ed8; text-decoration: underline; }
+        .resource-box { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1.5rem; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen overflow-hidden text-[15px]">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl md:shadow-none h-full absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300" id="sidebar">
+        <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50">
+            <div class="w-8 h-8 bg-blue-700 rounded-lg text-white flex items-center justify-center text-sm font-serif font-bold shadow-sm">UA</div>
+            <div><h1 class="text-sm font-bold text-slate-800 leading-tight serif-font">Mecánica de<br>Fluidos</h1></div>
+        </div>
+        <nav class="flex-1 overflow-y-auto p-3">
+            <ul class="space-y-1">
+                <li><button onclick="navTo('cover')" class="nav-item w-full text-left px-3 py-2.5" data-target="cover">Inicio / Portada</button></li>
+                <li><button onclick="navTo('density')" class="nav-item w-full text-left px-3 py-2.5" data-target="density">1. Densidad</button></li>
+                <li><button onclick="navTo('compressibility')" class="nav-item w-full text-left px-3 py-2.5" data-target="compressibility">2. Compresibilidad</button></li>
+                <li><button onclick="navTo('viscosity')" class="nav-item w-full text-left px-3 py-2.5" data-target="viscosity">3. Viscosidad</button></li>
+                <li><button onclick="navTo('capillarity')" class="nav-item w-full text-left px-3 py-2.5" data-target="capillarity">4. Capilaridad</button></li>
+                <li><button onclick="navTo('vapor')" class="nav-item w-full text-left px-3 py-2.5" data-target="vapor">5. Presión de Vapor</button></li>
+                <li class="pt-2 mt-2 border-t border-slate-100"><button onclick="navTo('quiz')" class="nav-item w-full text-left px-3 py-2.5 font-bold text-blue-700 bg-blue-50/50 hover:bg-blue-100" data-target="quiz">Evaluación Final</button></li>
+                <li><button onclick="navTo('biblio')" class="nav-item w-full text-left px-3 py-2.5 text-slate-500" data-target="biblio">Bibliografía</button></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Header Móvil -->
+    <div class="md:hidden bg-white border-b border-slate-200 p-3 flex justify-between items-center shadow-sm z-30 relative">
+        <span class="font-bold serif-font text-slate-800">Mecánica de Fluidos</span>
+        <button onclick="toggleSidebar()" class="text-slate-600 p-2 hover:bg-slate-100 rounded"><span class="text-xl">☰</span></button>
+    </div>
+
+    <!-- Área Principal con Perspectiva 3D -->
+    <main class="flex-1 h-full bg-slate-50" id="content-perspective">
+        <div class="max-w-5xl mx-auto p-5 md:p-8 pb-24">
+            
+            <!-- PORTADA -->
+            <section id="cover" class="tab-panel active page-turn-enter text-center flex flex-col items-center justify-center min-h-[80vh]">
+                <div class="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-slate-200 max-w-xl w-full">
+                    <div class="w-16 h-16 bg-blue-900 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl font-serif shadow-lg ring-4 ring-blue-50">UA</div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4 serif-font">Propiedades de los Fluidos</h1>
+                    <h2 class="text-base text-slate-500 mb-8 font-light uppercase tracking-widest">Guía de Estudio Interactiva</h2>
+                    <div class="grid grid-cols-2 gap-4 text-left bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8 shadow-inner text-sm">
+                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Profesor</p><p class="font-semibold text-slate-800 mb-0">Ph.D. Juan Sandoval H.</p></div>
+                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Curso</p><p class="font-semibold text-slate-800 mb-0">Mecánica de Fluidos</p></div>
+                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Institución</p><p class="font-semibold text-slate-800 mb-0">Universidad de América</p></div>
+                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Año</p><p class="font-semibold text-slate-800 mb-0">2026</p></div>
+                    </div>
+                    <button onclick="navTo('density')" class="bg-blue-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-blue-700 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 w-full md:w-auto">Comenzar Estudio</button>
+                </div>
+            </section>
+
+            <!-- 1. DENSIDAD -->
+            <section id="density" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
+                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 1</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Densidad y Derivados</h2></div>
+                </header>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="text-slate-700">
+                        <h3 class="font-bold text-slate-900 mb-2 text-sm border-l-4 border-blue-500 pl-2">Definiciones Fundamentales</h3>
+                        <ul class="list-none space-y-2 mb-4 text-sm">
+                            <li><strong>• Densidad ($\rho$):</strong> Masa por unidad de volumen ($kg/m^3$).</li>
+                            <li><strong>• Volumen Específico ($v$):</strong> Es el inverso de la densidad ($v=1/\rho$). Indica cuánto volumen ocupa 1 kg de masa.</li>
+                            <li><strong>• Peso Específico ($\gamma$):</strong> Fuerza de gravedad (peso) por unidad de volumen. Fundamental en hidrostática.</li>
+                            <li><strong>• Densidad Relativa ($SG$):</strong> Relación adimensional entre la densidad de un fluido y la del agua a 4°C ($1000 kg/m^3$).</li>
+                        </ul>
+                        
+                        <h3 class="font-bold text-slate-900 mb-2 text-sm border-l-4 border-blue-500 pl-2">Aplicaciones</h3>
+                        <p>Estas propiedades son base para operaciones de separación como <strong>sedimentación</strong> y <strong>centrifugación</strong>. En la industria, se usan escalas prácticas como los grados <strong>API</strong> (petróleo) y <strong>Brix</strong> (azúcares).</p>
+
+                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm mt-3 text-sm">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="math-display">$$ v = 1/\rho $$</div>
+                                <div class="math-display">$$ \gamma = \rho g $$</div>
+                                <div class="math-display">$$ SG = \rho / \rho_{agua} $$</div>
+                                <div class="math-display">$$ API = \frac{141.5}{SG} - 131.5 $$</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <figure><div class="img-box bg-slate-100"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Density_column.jpg?raw=true" alt="Columna Densidad"></div><figcaption>Fig 1.1: Estratificación debido a diferencias de $SG$.</figcaption></figure>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-auto">
+                            <h3 class="text-blue-900 font-bold mb-2 text-xs uppercase flex items-center gap-2">Calculadora API</h3>
+                            <div class="flex gap-3 items-end">
+                                <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Densidad (kg/m³)</label><input type="number" id="input-rho" class="w-full p-1.5 text-sm border border-slate-300 rounded outline-none" value="850"></div>
+                                <button onclick="calculateAPI()" class="btn-primary shadow-sm text-sm py-1.5">Calcular</button>
+                            </div>
+                            <div class="mt-2 flex justify-between items-center bg-white p-2 rounded border border-blue-100"><span class="text-xs text-slate-500 font-medium">Gravedad API:</span><span id="result-api" class="text-lg font-bold text-blue-800">-- °</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="resource-box">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <a href="https://www.youtube.com/watch?v=M2Q3fA9Ief4" target="_blank" class="external-link">📺 Video: ¿Qué son los grados API?</a>
+                        <a href="https://www.youtube.com/watch?v=Jea7M4JiBFQ" target="_blank" class="external-link">📺 Video: Densidad y Peso Específico (Teoría)</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. COMPRESIBILIDAD -->
+            <section id="compressibility" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
+                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 2</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Compresibilidad</h2></div>
+                </header>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="text-slate-700">
+                        <p>La compresibilidad se cuantifica con el <strong>Módulo de Elasticidad Volumétrica ($E_v$)</strong>. Valores típicos a 20°C:</p>
+                        <ul class="list-disc list-inside text-sm bg-slate-100 p-3 rounded border border-slate-200 mb-3">
+                            <li><strong>Mercurio:</strong> 28.5 GPa (Muy incompresible)</li>
+                            <li><strong>Agua:</strong> 2.2 GPa</li>
+                            <li><strong>Etanol:</strong> 1.15 GPa</li>
+                        </ul>
+                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100 text-center font-bold text-indigo-900 my-2 text-sm">
+                            Incompresibilidad en gases: <br> $$ Ma = V/c < 0.3 $$
+                        </div>
+                    </div>
+                    <div>
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Mach_Number_Flow_Regimes.png?raw=true" alt="Regímenes Mach"></div><figcaption>Fig 2.1: Regímenes según Mach.</figcaption></figure>
+                    </div>
+                </div>
+                <div class="resource-box">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <a href="https://www.youtube.com/watch?v=FERCAWBqDaE" target="_blank" class="external-link">📺 Video: Mach Number and Compressibility</a>
+                        <a href="https://www.youtube.com/watch?v=iMPFN3rLIr8" target="_blank" class="external-link">📺 Video: Basics of Compressible Flow</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. VISCOSIDAD -->
+            <section id="viscosity" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
+                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 3</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Viscosidad Absoluta</h2></div>
+                </header>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-4 text-slate-700">
+                        <p>La viscosidad disminuye con la temperatura en líquidos (índice de viscosidad en aceites). Regla de oro: <strong>Potencia de bombeo $\propto$ Viscosidad</strong>.</p>
+                        <div class="chart-wrapper"><canvas id="rheogramChart"></canvas></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/SIGAUS_aceite.jpg?raw=true" alt="Aceite Motor"></div><figcaption>Fig 3.1: Aceites multigrado.</figcaption></figure>
+                    </div>
+                </div>
+                <div class="resource-box">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <a href="https://www.youtube.com/watch?v=u5_LtYBg6Ag" target="_blank" class="external-link">📺 Video: Viscosity & Non-Newtonian Fluids</a>
+                        <a href="https://www.youtube.com/watch?v=dfVbWfhPQ3Y" target="_blank" class="external-link">📺 Video: Visual Experiments on Viscosity</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. CAPILARIDAD -->
+            <section id="capillarity" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
+                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 4</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Capilaridad</h2></div>
+                </header>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="text-slate-700">
+                        <p>Fenómeno regido por la tensión superficial. Es crítico en <strong>Ingeniería de Petróleos</strong> para entender la migración de crudo a través de los poros microscópicos de las rocas sedimentarias.</p>
+                        <div class="bg-white p-3 rounded border border-slate-200 shadow-sm my-3"><div class="math-display">$$ h = \frac{2 \sigma \cos \theta}{\gamma r} $$</div></div>
+                    </div>
+                    <div>
+                         <figure>
+                            <div class="bg-white border border-slate-300 rounded-lg h-[220px] flex items-end justify-center gap-4 pb-0 relative overflow-hidden shadow-inner">
+                                <div class="flex flex-col items-center justify-end h-full w-8 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">fino</div><div class="w-3 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[80%] opacity-80"></div></div></div>
+                                <div class="flex flex-col items-center justify-end h-full w-10 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">medio</div><div class="w-6 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[40%] opacity-80"></div></div></div>
+                                <div class="flex flex-col items-center justify-end h-full w-14 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">ancho</div><div class="w-10 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[15%] opacity-80"></div></div></div>
+                                <div class="absolute bottom-0 w-full h-5 bg-blue-500 opacity-80 z-0"></div>
+                            </div>
+                            <figcaption>Fig 4.1: Capilaridad vs Diámetro.</figcaption>
+                        </figure>
+                    </div>
+                </div>
+                <div class="resource-box">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <a href="https://www.youtube.com/watch?v=wFL-MH5RZoI" target="_blank" class="external-link">📺 Video: Capillary Pressure in Reservoirs</a>
+                        <a href="https://www.youtube.com/watch?v=-BwdFd2ViAw" target="_blank" class="external-link">📺 Video: Capillarity Explained Simply</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. PRESIÓN DE VAPOR -->
+            <section id="vapor" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
+                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 5</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Presión de Vapor</h2></div>
+                </header>
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="flex flex-col gap-4">
+                        <div class="text-slate-700 text-sm">
+                            <p>Indica la tendencia a evaporarse. <strong>Volátiles</strong> (alta $P_v$, ej. gasolina) vs <strong>No Volátiles</strong> (baja $P_v$, ej. aceites).</p>
+                        </div>
+                        <div class="chart-wrapper"><canvas id="vaporChart"></canvas></div>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/CENTRIPUMP.jpg?raw=true" alt="Daño por Cavitación"></div><figcaption>Fig 5.1: Daño por cavitación.</figcaption></figure>
+                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-red-800 mb-1 text-sm">Riesgo: Cavitación</h4>
+                            <p class="text-sm text-red-900 leading-relaxed text-left">Implosión violenta de burbujas cuando $P_{local} < P_v$.</p>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Ejemplo 6 -->
+                 <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all">
+                    <summary class="flex justify-between items-center p-4 cursor-pointer select-none bg-slate-50 hover:bg-slate-100">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">EJEMPLO 6</span> 
+                            <span class="font-bold text-slate-800">Diagnóstico de Bomba</span>
+                        </div>
+                        <span class="text-slate-400 transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="p-5 border-t border-slate-100">
+                        <p class="italic mb-3 bg-slate-50 p-2 rounded border-l-4 border-emerald-500 text-sm">
+                            Bomba operando con agua a <strong>60°C</strong>. Un vacuómetro en la succión marca una presión absoluta de <strong>15 kPa</strong>. ¿Existe riesgo de cavitación?
+                        </p>
+                        <div class="bg-slate-50 p-3 rounded border border-slate-200">
+                            <p class="text-sm mb-1 text-left">Consultando la curva: $P_v(60^\circ C) \approx 19.9 \, kPa$.</p>
+                            <div class="math-display">$$ P_{succión} (15) < P_{vapor} (19.9) $$</div>
+                            <p class="mt-2 text-red-700 font-bold text-center text-sm">¡SÍ, RIESGO DE CAVITACIÓN!</p>
+                        </div>
+                    </div>
+                </details>
+                <div class="resource-box">
+                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <a href="https://www.youtube.com/watch?v=VBLlBX1uV-o" target="_blank" class="external-link">📺 Video: Understanding Cavitation</a>
+                        <a href="https://www.youtube.com/watch?v=FeFLDin2uIY" target="_blank" class="external-link">📺 Video: Pump Cavitation Prevention</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EVALUACIÓN Y BIBLIO -->
+            <section id="quiz" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Evaluación</span>
+                    <h2 class="text-2xl text-slate-800 font-bold serif-font">Cuestionario Final</h2>
+                </header>
+                <div id="quiz-container" class="space-y-3 mb-5"></div>
+                <div class="flex gap-4">
+                    <button id="submit-quiz-btn" onclick="submitQuiz()" class="btn-primary shadow-lg px-6">Calificar</button>
+                    <button id="retry-quiz-btn" onclick="initQuiz()" class="hidden bg-slate-200 text-slate-700 px-5 py-2 rounded font-semibold hover:bg-slate-300 transition shadow">Reintentar</button>
+                </div>
+                <div id="quiz-result" class="hidden mt-5 p-5 bg-emerald-50 rounded-xl text-center border border-emerald-200 shadow-sm">
+                    <div class="text-4xl font-bold text-emerald-600 mb-1 serif-font"><span id="score-val">0</span>/10</div>
+                    <p id="score-msg" class="text-emerald-800 italic text-sm">Feedback...</p>
+                </div>
+            </section>
+            
+            <section id="biblio" class="tab-panel">
+                <header class="mb-5 border-b border-slate-300 pb-3"><h2 class="text-2xl text-slate-800 font-bold serif-font">Bibliografía</h2></header>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 text-sm text-slate-700 font-mono space-y-2 shadow-sm">
+                     <p>Cengel, Y. A. (2018). <i>Fluid Mechanics</i>.</p>
+                     <p>Mott, R. L. (2016). <i>Applied Fluid Mechanics</i>.</p>
+                     <p>Fox, R. W. (2020). <i>Intro to Fluid Mechanics</i>.</p>
+                     <p>Sandoval Herrera, J. (2026). <i>Notas de Clase</i>. U. América.</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        // --- Navegación con Efecto de Página ---
+        function navTo(id) {
+            document.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.remove('active');
+                p.classList.remove('page-turn-enter');
+            });
+            const newSection = document.getElementById(id);
+            if(newSection) {
+                newSection.classList.add('active');
+                void newSection.offsetWidth; 
+                newSection.classList.add('page-turn-enter');
+            }
+            document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+            const btn = document.querySelector(`button[data-target="${id}"]`);
+            if(btn) btn.classList.add('active');
+            document.getElementById('content-perspective').scrollTop = 0;
+            if(window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+            if (id === 'viscosity') renderRheogram();
+            if (id === 'vapor') renderVaporChart();
+        }
+
+        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
+
+        function calculateAPI() {
+            const rho = parseFloat(document.getElementById('input-rho').value);
+            if(rho>0) document.getElementById('result-api').innerText = ((141.5 / (rho/1000)) - 131.5).toFixed(1) + " °";
+        }
+
+        function getRheogramData() {
+            const x = [0,10,20,30,40,50,60,70,80,90,100];
+            return {
+                labels: x,
+                datasets: [
+                    { label: 'Newtoniano', data: x.map(v=>v*1), borderColor: '#3b82f6', tension:0, borderWidth:3 },
+                    { label: 'Pseudoplástico', data: x.map(v=>Math.pow(v,0.7)*3), borderColor: '#f43f5e', tension:0.4, borderWidth:3 },
+                    { label: 'Dilatante', data: x.map(v=>Math.pow(v,1.4)*0.2), borderColor: '#10b981', tension:0.4, borderWidth:3 }
+                ],
+                xLabel: 'Tasa de Deformación (du/dy) [1/s]', yLabel: 'Esfuerzo Shear (Pa)', title: 'Reograma'
+            };
+        }
+        
+        function getVaporData() {
+            const d=[]; for(let t=0;t<=100;t+=5) d.push(Math.pow(10,8.07131-(1730.63/(t+233.426)))/7.50062);
+            return {
+                labels: Array.from({length:21},(_,i)=>i*5),
+                datasets: [{ label: 'Pv Agua (kPa)', data: d, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.1)', fill:true, borderWidth:3, pointRadius:4 }],
+                xLabel: 'Temp (°C)', yLabel: 'Presión (kPa)', title: 'Presión de Vapor'
+            };
+        }
+
+        let rheoChart, vapChart;
+        function renderRheogram() {
+            if(rheoChart) return;
+            const d = getRheogramData();
+            rheoChart = new Chart(document.getElementById('rheogramChart').getContext('2d'), {
+                type: 'line', data: { labels: d.labels, datasets: d.datasets },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x:{title:{display:true,text:d.xLabel}}, y:{title:{display:true,text:d.yLabel}} } }
+            });
+        }
+        function renderVaporChart() {
+            if(vapChart) return;
+            const d = getVaporData();
+            vapChart = new Chart(document.getElementById('vaporChart').getContext('2d'), {
+                type: 'line', data: { labels: d.labels, datasets: d.datasets },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x:{title:{display:true,text:d.xLabel}}, y:{title:{display:true,text:d.yLabel}} }, plugins: { legend: {display:false} } }
+            });
+        }
+
+        const qPool = [
+            { q: "Condición Mach flujo incompresible:", opt: ["Ma > 1", "Ma < 0.3", "Ma = 0", "Ma > 0.5"], a: 1 },
+            { q: "Relaciona densidad fluido/agua:", opt: ["Viscosidad", "Peso Esp.", "Gravedad Esp.", "Pv"], a: 2 },
+            { q: "Si P < Pv ocurre:", opt: ["Solidificación", "Densificación", "Cavitación", "Nada"], a: 2 },
+            { q: "Unidad SI viscosidad dinámica:", opt: ["Pa·s", "m²/s", "Poise", "Stoke"], a: 0 },
+            { q: "Fluido dilatante:", opt: ["Visc. cte", "Visc. baja c/corte", "Visc. sube c/corte", "Sin visc."], a: 2 },
+            { q: "Recíproco densidad:", opt: ["API", "Vol. Esp.", "Peso Esp.", "Compresibilidad"], a: 1 },
+            { q: "Fenómeno tubos < 10mm:", opt: ["Turbulencia", "Cavitación", "Capilaridad", "Compresibilidad"], a: 2 },
+            { q: "Esfuerzo cortante prop. a:", opt: ["P", "T", "Gradiente vel.", "Vol"], a: 2 },
+            { q: "A 20°C, mayor visc:", opt: ["Agua", "Mercurio", "Aire", "Glicerina"], a: 3 },
+            { q: "Efecto alta visc en bomba:", opt: ["- Potencia", "+ Potencia", "= Potencia", "+ Flujo"], a: 1 },
+        ];
+        
+        let currQ = [];
+        function initQuiz() {
+            const c = document.getElementById('quiz-container'); c.innerHTML='';
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('submit-quiz-btn').classList.remove('hidden');
+            document.getElementById('retry-quiz-btn').classList.add('hidden');
+            
+            // 1. Mezclar Preguntas
+            currQ = [...qPool].sort(()=>0.5-Math.random()).slice(0,10);
+            
+            currQ.forEach((q,i) => {
+                const d = document.createElement('div');
+                d.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm";
+                
+                // 2. Mezclar Opciones
+                let indices = q.opt.map((_, idx) => idx); // [0, 1, 2, 3]
+                indices.sort(() => 0.5 - Math.random()); // Mezclar índices
+                
+                let optionsHTML = '';
+                indices.forEach(k => {
+                    // El valor del input (k) es el índice original, así que la validación sigue funcionando
+                    optionsHTML += `<label class="flex items-center gap-3 mt-2 cursor-pointer p-2 hover:bg-slate-50 rounded"><input type="radio" name="q${i}" value="${k}" class="w-4 h-4 accent-blue-600"> <span>${q.opt[k]}</span></label>`;
+                });
+                
+                d.innerHTML = `<p class="font-bold text-base mb-2">${i+1}. ${q.q}</p>${optionsHTML}<div id="fb-q${i}" class="hidden mt-3 p-2 rounded font-bold text-center text-sm"></div>`;
+                c.appendChild(d);
+            });
+        }
+
+        function submitQuiz() {
+            let sc = 0;
+            currQ.forEach((q,i) => {
+                const s = document.querySelector(`input[name="q${i}"]:checked`);
+                const f = document.getElementById(`fb-q${i}`); f.classList.remove('hidden');
+                document.querySelectorAll(`input[name="q${i}"]`).forEach(inp=>inp.disabled=true);
+                
+                if(s && +s.value === q.a) { 
+                    sc++; 
+                    f.className="bg-emerald-100 text-emerald-800"; 
+                    f.innerText="✓ Correcto"; 
+                } else { 
+                    f.className="bg-red-100 text-red-800"; 
+                    f.innerText=`✗ Incorrecto. Resp: ${q.opt[q.a]}`; 
+                }
+            });
+            document.getElementById('score-val').innerText = sc;
+            document.getElementById('quiz-result').classList.remove('hidden');
+            document.getElementById('submit-quiz-btn').classList.add('hidden');
+            document.getElementById('retry-quiz-btn').classList.remove('hidden');
+            document.getElementById('quiz-result').scrollIntoView({behavior:'smooth'});
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
