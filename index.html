@@ -11,7 +11,7 @@
     <!-- Chart.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
-    <!-- MathJax Configuration -->
+    <!-- MathJax -->
     <script>
         MathJax = {
             tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -20,7 +20,6 @@
                 ready: () => {
                     MathJax.startup.defaultReady();
                     const styles = document.createElement('style');
-                    // Reglas CSS críticas para evitar saltos de línea con fórmulas inline
                     styles.innerHTML = 'mjx-container { display: inline-block !important; vertical-align: text-bottom !important; margin: 0 !important; } svg { display: inline !important; }';
                     document.head.appendChild(styles);
                 }
@@ -36,139 +35,157 @@
 
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9;
+            background-color: #f8fafc;
             color: #334155;
             overflow: hidden; 
             -webkit-font-smoothing: antialiased;
         }
         h1, h2, h3, .serif-font { font-family: 'Playfair Display', serif; }
 
-        /* --- EFECTO DE VUELTA DE PÁGINA (BOOK FLIP) --- */
-        #content-perspective {
-            perspective: 2000px;
-            height: 100%;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-            position: relative;
+        /* --- FONDO MARCA DE AGUA --- */
+        #watermark-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: url('https://img.freepik.com/free-vector/white-abstract-background-design_23-2148825582.jpg?w=2000'); 
+            background-size: cover; background-position: center;
+            opacity: 0.4; pointer-events: none; mix-blend-mode: multiply;
         }
 
-        .tab-panel {
-            display: none;
-            transform-origin: center left;
-            backface-visibility: hidden;
+        /* --- VISIBILIDAD DE SECCIONES --- */
+        .tab-panel { display: none !important; }
+        .tab-panel.active { display: block !important; }
+
+        /* Estilos de las tarjetas de contenido */
+        .content-card {
+            background-color: rgba(255, 255, 255, 0.92); 
+            backdrop-filter: blur(8px);
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
+        /* Animación de página */
         .page-turn-enter {
-            display: block;
-            animation: turnPageIn 0.7s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+            display: block !important;
+            animation: turnPageIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
         @keyframes turnPageIn {
-            0% { opacity: 0; transform: rotateY(-60deg) translateX(-30px); }
-            100% { opacity: 1; transform: rotateY(0deg) translateX(0); }
+            0% { opacity: 0; transform: perspective(2000px) rotateY(-45deg) translateX(-50px); }
+            100% { opacity: 1; transform: perspective(2000px) rotateY(0deg) translateX(0); }
         }
 
         /* --- ESTILOS GENERALES --- */
-        p, li { text-align: left; margin-bottom: 0.6rem; line-height: 1.5; }
+        p, li { text-align: left; margin-bottom: 0.8rem; line-height: 1.7; font-size: 1.05rem; }
         
         .math-display {
-            overflow-x: auto; padding: 0.4rem; background-color: #ffffff;
-            border-radius: 0.5rem; border: 1px solid #e2e8f0; margin: 0.4rem 0;
-            text-align: center; font-size: 1rem;
+            overflow-x: auto; padding: 0.75rem; background-color: #fff;
+            border-radius: 0.5rem; border: 1px solid #e2e8f0; margin: 1rem 0;
+            text-align: center; font-size: 1.1rem;
         }
 
-        .nav-item { position: relative; transition: all 0.2s ease; border-radius: 6px; margin-bottom: 2px; }
+        .nav-item { transition: all 0.2s; border-radius: 6px; margin-bottom: 2px; }
         .nav-item:hover { background-color: #e2e8f0; color: #0f172a; }
-        .nav-item.active { background-color: #2563eb; color: #ffffff; font-weight: 600; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2); }
+        .nav-item.active { background-color: #2563eb; color: #fff; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
         
-        .chart-wrapper { position: relative; width: 100%; height: 260px; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 10px; }
-        .expand-btn { position: absolute; top: 8px; right: 8px; z-index: 10; background: rgba(255,255,255,0.95); border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.7rem; color: #475569; cursor: pointer; transition: all 0.2s; font-weight: 600; display: flex; align-items: center; gap: 4px; }
-        .expand-btn:hover { background: #eff6ff; color: #1d4ed8; border-color: #93c5fd; }
-        
-        .btn-primary { background-color: #2563eb; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; transition: background-color 0.2s; font-size: 0.9rem; font-weight: 500; }
+        .chart-wrapper { position: relative; width: 100%; height: 300px; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; padding: 10px; }
+        .btn-primary { background-color: #2563eb; color: white; padding: 0.5rem 1.5rem; border-radius: 0.5rem; transition: 0.2s; font-weight: 500; font-size: 1rem; }
         .btn-primary:hover { background-color: #1d4ed8; }
         
-        figcaption { font-size: 0.75rem; color: #64748b; text-align: center; margin-top: 0.5rem; font-style: italic; }
-        .img-box { height: 200px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; overflow: hidden; padding: 4px; }
+        figcaption { font-size: 0.85rem; color: #64748b; text-align: center; margin-top: 0.75rem; font-style: italic; }
+        .img-box { height: 240px; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid #cbd5e1; border-radius: 0.5rem; overflow: hidden; padding: 4px; }
         .img-box img { max-height: 100%; max-width: 100%; object-fit: contain; }
 
         details > summary { list-style: none; outline: none; }
         details > summary::-webkit-details-marker { display: none; }
         
-        .external-link { display: flex; align-items: center; gap: 8px; color: #2563eb; font-size: 0.85rem; font-weight: 500; text-decoration: none; padding: 4px 0; transition: color 0.2s; }
-        .external-link:hover { color: #1d4ed8; text-decoration: underline; }
-        .resource-box { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding-top: 1rem; margin-top: 1.5rem; }
+        .external-link { display: flex; align-items: center; gap: 8px; color: #2563eb; font-size: 0.95rem; font-weight: 500; text-decoration: none; padding: 6px 0; }
+        .external-link:hover { text-decoration: underline; }
+        .resource-box { background-color: #f1f5f9; border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 2rem; border-radius: 0.5rem; padding: 1.5rem; }
+        
+        /* Ajuste Portada */
+        #cover.tab-panel { background: transparent !important; box-shadow: none !important; border: none !important; }
     </style>
 </head>
-<body class="flex flex-col md:flex-row h-screen overflow-hidden text-[15px]">
+<body class="flex flex-col md:flex-row h-screen overflow-hidden text-[16px]">
+
+    <div id="watermark-bg"></div>
 
     <!-- Sidebar -->
-    <aside class="w-full md:w-64 bg-white border-r border-slate-200 flex flex-col z-20 shadow-xl md:shadow-none h-full absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300" id="sidebar">
-        <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50">
-            <div class="w-8 h-8 bg-blue-700 rounded-lg text-white flex items-center justify-center text-sm font-serif font-bold shadow-sm">UA</div>
-            <div><h1 class="text-sm font-bold text-slate-800 leading-tight serif-font">Mecánica de<br>Fluidos</h1></div>
+    <aside class="w-full md:w-64 bg-white/95 backdrop-blur-sm border-r border-slate-200 flex flex-col z-20 shadow-xl md:shadow-none h-full absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300" id="sidebar">
+        <div class="p-6 border-b border-slate-100 flex items-center gap-3 bg-slate-50/80">
+            <div class="w-10 h-10 bg-blue-700 rounded-lg text-white flex items-center justify-center text-lg font-serif font-bold shadow-sm">UA</div>
+            <div><h1 class="text-base font-bold text-slate-800 leading-tight serif-font">Mecánica de<br>Fluidos</h1></div>
         </div>
-        <nav class="flex-1 overflow-y-auto p-3">
+        <nav class="flex-1 overflow-y-auto p-4">
             <ul class="space-y-1">
-                <li><button onclick="navTo('cover')" class="nav-item w-full text-left px-3 py-2.5" data-target="cover">Inicio / Portada</button></li>
-                <li><button onclick="navTo('density')" class="nav-item w-full text-left px-3 py-2.5" data-target="density">1. Densidad</button></li>
-                <li><button onclick="navTo('compressibility')" class="nav-item w-full text-left px-3 py-2.5" data-target="compressibility">2. Compresibilidad</button></li>
-                <li><button onclick="navTo('viscosity')" class="nav-item w-full text-left px-3 py-2.5" data-target="viscosity">3. Viscosidad</button></li>
-                <li><button onclick="navTo('capillarity')" class="nav-item w-full text-left px-3 py-2.5" data-target="capillarity">4. Capilaridad</button></li>
-                <li><button onclick="navTo('vapor')" class="nav-item w-full text-left px-3 py-2.5" data-target="vapor">5. Presión de Vapor</button></li>
-                <li class="pt-2 mt-2 border-t border-slate-100"><button onclick="navTo('quiz')" class="nav-item w-full text-left px-3 py-2.5 font-bold text-blue-700 bg-blue-50/50 hover:bg-blue-100" data-target="quiz">Evaluación Final</button></li>
-                <li><button onclick="navTo('biblio')" class="nav-item w-full text-left px-3 py-2.5 text-slate-500" data-target="biblio">Bibliografía</button></li>
+                <li><button onclick="navTo('cover')" class="nav-item w-full text-left px-4 py-3" data-target="cover">Inicio / Portada</button></li>
+                <li><button onclick="navTo('density')" class="nav-item w-full text-left px-4 py-3" data-target="density">1. Densidad</button></li>
+                <li><button onclick="navTo('compressibility')" class="nav-item w-full text-left px-4 py-3" data-target="compressibility">2. Compresibilidad</button></li>
+                <li><button onclick="navTo('viscosity')" class="nav-item w-full text-left px-4 py-3" data-target="viscosity">3. Viscosidad</button></li>
+                <li><button onclick="navTo('capillarity')" class="nav-item w-full text-left px-4 py-3" data-target="capillarity">4. Capilaridad</button></li>
+                <li><button onclick="navTo('vapor')" class="nav-item w-full text-left px-4 py-3" data-target="vapor">5. Presión de Vapor</button></li>
+                <li class="pt-4 mt-2 border-t border-slate-100"><button onclick="navTo('quiz')" class="nav-item w-full text-left px-4 py-3 font-bold text-blue-700 bg-blue-50/50 hover:bg-blue-100" data-target="quiz">Evaluación Final</button></li>
+                <li><button onclick="navTo('biblio')" class="nav-item w-full text-left px-4 py-3 text-slate-500" data-target="biblio">Bibliografía</button></li>
             </ul>
         </nav>
     </aside>
 
     <!-- Header Móvil -->
-    <div class="md:hidden bg-white border-b border-slate-200 p-3 flex justify-between items-center shadow-sm z-30 relative">
+    <div class="md:hidden bg-white/90 backdrop-blur-md border-b border-slate-200 p-4 flex justify-between items-center shadow-sm z-30 relative">
         <span class="font-bold serif-font text-slate-800">Mecánica de Fluidos</span>
         <button onclick="toggleSidebar()" class="text-slate-600 p-2 hover:bg-slate-100 rounded"><span class="text-xl">☰</span></button>
     </div>
 
-    <!-- Área Principal con Perspectiva 3D -->
-    <main class="flex-1 h-full bg-slate-50" id="content-perspective">
-        <div class="max-w-5xl mx-auto p-5 md:p-8 pb-24">
+    <!-- Área Principal (Ampliada) -->
+    <main class="flex-1 h-full overflow-y-auto" id="content-perspective">
+        <div class="max-w-7xl mx-auto p-4 md:p-8 pb-32">
             
             <!-- PORTADA -->
-            <section id="cover" class="tab-panel active page-turn-enter text-center flex flex-col items-center justify-center min-h-[80vh]">
-                <div class="bg-white p-8 md:p-12 rounded-2xl shadow-lg border border-slate-200 max-w-xl w-full">
-                    <div class="w-16 h-16 bg-blue-900 rounded-full mx-auto mb-6 flex items-center justify-center text-white text-2xl font-serif shadow-lg ring-4 ring-blue-50">UA</div>
-                    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 mb-4 serif-font">Propiedades de los Fluidos</h1>
-                    <h2 class="text-base text-slate-500 mb-8 font-light uppercase tracking-widest">Guía de Estudio Interactiva</h2>
-                    <div class="grid grid-cols-2 gap-4 text-left bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8 shadow-inner text-sm">
-                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Profesor</p><p class="font-semibold text-slate-800 mb-0">Ph.D. Juan Sandoval H.</p></div>
-                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Curso</p><p class="font-semibold text-slate-800 mb-0">Mecánica de Fluidos</p></div>
-                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Institución</p><p class="font-semibold text-slate-800 mb-0">Universidad de América</p></div>
-                        <div><p class="text-slate-400 uppercase font-bold text-[10px] mb-0">Año</p><p class="font-semibold text-slate-800 mb-0">2026</p></div>
+            <section id="cover" class="tab-panel active page-turn-enter">
+                <div class="flex flex-col items-center justify-center min-h-[85vh] text-center">
+                    <div class="bg-white/90 p-12 md:p-20 rounded-3xl shadow-2xl border border-slate-100 max-w-5xl w-full backdrop-blur-sm">
+                        <div class="w-24 h-24 bg-blue-900 rounded-full mx-auto mb-8 flex items-center justify-center text-white text-4xl font-serif shadow-xl ring-8 ring-blue-50">UA</div>
+                        <h1 class="text-5xl md:text-7xl font-bold text-slate-900 mb-6 serif-font leading-tight tracking-tight">Propiedades de los Fluidos</h1>
+                        <h2 class="text-xl md:text-2xl text-slate-500 mb-12 font-light uppercase tracking-[0.2em]">Guía de Estudio Interactiva</h2>
+                        
+                        <div class="grid grid-cols-2 gap-8 text-left bg-slate-50/80 p-10 rounded-2xl border border-slate-200 mb-12 shadow-inner text-lg">
+                            <div><p class="text-slate-400 uppercase font-bold text-xs mb-1">Profesor</p><p class="font-semibold text-slate-800 mb-0">Ph.D. Juan Sandoval H.</p></div>
+                            <div><p class="text-slate-400 uppercase font-bold text-xs mb-1">Curso</p><p class="font-semibold text-slate-800 mb-0">Mecánica de Fluidos</p></div>
+                            <div><p class="text-slate-400 uppercase font-bold text-xs mb-1">Institución</p><p class="font-semibold text-slate-800 mb-0">Universidad de América</p></div>
+                            <div><p class="text-slate-400 uppercase font-bold text-xs mb-1">Año</p><p class="font-semibold text-slate-800 mb-0">2026</p></div>
+                        </div>
+                        
+                        <button onclick="navTo('density')" class="bg-blue-600 text-white px-12 py-5 rounded-full text-xl font-bold hover:bg-blue-700 shadow-xl hover:shadow-2xl transition transform hover:-translate-y-1 w-full md:w-auto tracking-wide">
+                            COMENZAR ESTUDIO
+                        </button>
                     </div>
-                    <button onclick="navTo('density')" class="bg-blue-600 text-white px-8 py-3 rounded-full text-base font-semibold hover:bg-blue-700 shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 w-full md:w-auto">Comenzar Estudio</button>
                 </div>
             </section>
 
             <!-- 1. DENSIDAD -->
-            <section id="density" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
-                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 1</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Densidad y Derivados</h2></div>
+            <section id="density" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Módulo 1</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Densidad y Derivados</h2>
                 </header>
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                
+                <div class="grid lg:grid-cols-2 gap-10 mb-10">
                     <div class="text-slate-700">
-                        <h3 class="font-bold text-slate-900 mb-2 text-sm border-l-4 border-blue-500 pl-2">Definiciones Fundamentales</h3>
-                        <ul class="list-none space-y-2 mb-4 text-sm">
+                        <h3 class="font-bold text-slate-900 mb-4 text-lg border-l-4 border-blue-500 pl-4">Definiciones Fundamentales</h3>
+                        <ul class="list-none space-y-4 mb-6 text-base">
                             <li><strong>• Densidad ($\rho$):</strong> Masa por unidad de volumen ($kg/m^3$).</li>
                             <li><strong>• Volumen Específico ($v$):</strong> Es el inverso de la densidad ($v=1/\rho$). Indica cuánto volumen ocupa 1 kg de masa.</li>
-                            <li><strong>• Peso Específico ($\gamma$):</strong> Fuerza de gravedad (peso) por unidad de volumen. Fundamental en hidrostática.</li>
-                            <li><strong>• Densidad Relativa ($SG$):</strong> Relación adimensional entre la densidad de un fluido y la del agua a 4°C ($1000 kg/m^3$).</li>
+                            <li><strong>• Peso Específico ($\gamma$):</strong> Fuerza de gravedad (peso) por unidad de volumen ($\gamma = \rho g$). Es la propiedad clave en la Hidrostática.</li>
+                            <li><strong>• Densidad Relativa ($SG$):</strong> Relación adimensional comparativa: $SG = \rho_{fluido} / \rho_{agua@4^\circ C}$.</li>
                         </ul>
                         
-                        <h3 class="font-bold text-slate-900 mb-2 text-sm border-l-4 border-blue-500 pl-2">Aplicaciones</h3>
-                        <p>Estas propiedades son base para operaciones de separación como <strong>sedimentación</strong> y <strong>centrifugación</strong>. En la industria, se usan escalas prácticas como los grados <strong>API</strong> (petróleo) y <strong>Brix</strong> (azúcares).</p>
+                        <h3 class="font-bold text-slate-900 mb-4 text-lg border-l-4 border-blue-500 pl-4">Aplicaciones Industriales</h3>
+                        <p>Estas propiedades gobiernan el diseño de separadores por gravedad (sedimentación, centrifugación). En el sector petrolero, el estándar es el grado <strong>API</strong>, mientras que en alimentos se usan los grados <strong>Brix</strong>.</p>
 
-                        <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-sm mt-3 text-sm">
-                            <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-white p-6 rounded-lg border border-slate-200 shadow-sm mt-6">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="math-display">$$ v = 1/\rho $$</div>
                                 <div class="math-display">$$ \gamma = \rho g $$</div>
                                 <div class="math-display">$$ SG = \rho / \rho_{agua} $$</div>
@@ -176,74 +193,160 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-4">
-                        <figure><div class="img-box bg-slate-100"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Density_column.jpg?raw=true" alt="Columna Densidad"></div><figcaption>Fig 1.1: Estratificación debido a diferencias de $SG$.</figcaption></figure>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-auto">
-                            <h3 class="text-blue-900 font-bold mb-2 text-xs uppercase flex items-center gap-2">Calculadora API</h3>
-                            <div class="flex gap-3 items-end">
-                                <div class="flex-1"><label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Densidad (kg/m³)</label><input type="number" id="input-rho" class="w-full p-1.5 text-sm border border-slate-300 rounded outline-none" value="850"></div>
-                                <button onclick="calculateAPI()" class="btn-primary shadow-sm text-sm py-1.5">Calcular</button>
+                    
+                    <div class="flex flex-col gap-6">
+                        <figure>
+                            <div class="img-box bg-slate-100"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Density_column.jpg?raw=true" alt="Columna Densidad"></div>
+                            <figcaption>Fig 1.1: Estratificación de fluidos debido a diferencias en su Gravedad Específica ($SG$).</figcaption>
+                        </figure>
+                        
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-auto">
+                            <h3 class="text-blue-900 font-bold mb-4 text-sm uppercase flex items-center gap-2">Calculadora API</h3>
+                            <div class="flex gap-4 items-end">
+                                <div class="flex-1">
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Densidad (kg/m³)</label>
+                                    <input type="number" id="input-rho" class="w-full p-3 text-base border border-slate-300 rounded outline-none focus:ring-2 focus:ring-blue-500" value="850">
+                                </div>
+                                <button onclick="calculateAPI()" class="btn-primary shadow-sm">Calcular</button>
                             </div>
-                            <div class="mt-2 flex justify-between items-center bg-white p-2 rounded border border-blue-100"><span class="text-xs text-slate-500 font-medium">Gravedad API:</span><span id="result-api" class="text-lg font-bold text-blue-800">-- °</span></div>
+                            <div class="mt-4 flex justify-between items-center bg-white p-4 rounded border border-blue-100">
+                                <span class="text-sm text-slate-500 font-medium">Gravedad API:</span>
+                                <span id="result-api" class="text-2xl font-bold text-blue-800">-- °</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Ejemplo Restaurado Completo -->
+                <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden mb-8">
+                    <summary class="flex justify-between items-center p-5 cursor-pointer select-none bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <div class="flex items-center gap-4">
+                            <span class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold tracking-wide">EJEMPLO 1</span> 
+                            <span class="font-bold text-slate-800 text-lg">Clasificación Comercial de Crudo</span>
+                        </div>
+                        <span class="text-slate-400 transform group-open:rotate-180 transition-transform duration-300">▼</span>
+                    </summary>
+                    <div class="p-6 border-t border-slate-100 bg-white">
+                        <p class="font-medium text-slate-900 mb-2">Enunciado:</p>
+                        <p class="italic mb-4 bg-slate-50 p-4 rounded border-l-4 border-emerald-500 text-slate-700">
+                            Un ingeniero de producción en un campo petrolero toma una muestra de crudo y mide su gravedad específica, obteniendo un valor de <strong>$SG = 0.85$</strong>. Se requiere calcular sus grados API para clasificarlo comercialmente y determinar su precio en el mercado internacional. (Recuerde que un crudo se considera "liviano" si su API > 31.1).
+                        </p>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 font-mono text-base">
+                            <p class="mb-2">Cálculo:</p>
+                            <div class="math-display">$$ API = \frac{141.5}{0.85} - 131.5 \approx 35^\circ $$</div>
+                            <p class="mt-3 text-emerald-800 font-bold text-center">Conclusión: Como $35 > 31.1$, se clasifica como CRUDO LIVIANO de alto valor.</p>
+                        </div>
+                    </div>
+                </details>
+
                 <div class="resource-box">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
-                    <div class="grid md:grid-cols-2 gap-3">
-                        <a href="https://www.youtube.com/watch?v=M2Q3fA9Ief4" target="_blank" class="external-link">📺 Video: ¿Qué son los grados API?</a>
-                        <a href="https://www.youtube.com/watch?v=Jea7M4JiBFQ" target="_blank" class="external-link">📺 Video: Densidad y Peso Específico (Teoría)</a>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <a href="https://www.youtube.com/watch?v=M2Q3fA9Ief4" target="_blank" class="external-link">📺 Video: ¿Qué son los grados API? (Explicación detallada)</a>
+                        <a href="https://www.youtube.com/watch?v=Jea7M4JiBFQ" target="_blank" class="external-link">📺 Video: Diferencia entre Densidad y Peso Específico</a>
                     </div>
                 </div>
             </section>
 
             <!-- 2. COMPRESIBILIDAD -->
-            <section id="compressibility" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
-                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 2</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Compresibilidad</h2></div>
+            <section id="compressibility" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Módulo 2</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Compresibilidad</h2>
                 </header>
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                
+                <div class="grid lg:grid-cols-2 gap-10 mb-10">
                     <div class="text-slate-700">
-                        <p>La compresibilidad se cuantifica con el <strong>Módulo de Elasticidad Volumétrica ($E_v$)</strong>. Valores típicos a 20°C:</p>
-                        <ul class="list-disc list-inside text-sm bg-slate-100 p-3 rounded border border-slate-200 mb-3">
-                            <li><strong>Mercurio:</strong> 28.5 GPa (Muy incompresible)</li>
-                            <li><strong>Agua:</strong> 2.2 GPa</li>
-                            <li><strong>Etanol:</strong> 1.15 GPa</li>
+                        <p>La compresibilidad mide cuánto disminuye el volumen de un fluido al aumentar la presión. Se cuantifica mediante el <strong>Módulo de Elasticidad Volumétrica ($E_v$)</strong>. Un $E_v$ alto indica gran rigidez.</p>
+                        <p class="mb-2 font-bold">Valores típicos a 20°C:</p>
+                        <ul class="list-disc list-inside text-base bg-slate-100 p-5 rounded border border-slate-200 mb-5">
+                            <li><strong>Mercurio:</strong> 28.5 GPa (Extremadamente incompresible)</li>
+                            <li><strong>Agua:</strong> 2.2 GPa (Referencia para líquidos)</li>
+                            <li><strong>Etanol:</strong> 1.15 GPa (Más compresible que el agua)</li>
                         </ul>
-                        <div class="bg-indigo-50 p-3 rounded border border-indigo-100 text-center font-bold text-indigo-900 my-2 text-sm">
-                            Incompresibilidad en gases: <br> $$ Ma = V/c < 0.3 $$
+                        <div class="bg-indigo-50 p-5 rounded-lg border border-indigo-100 text-center font-bold text-indigo-900 my-4 shadow-sm">
+                            Criterio de Incompresibilidad en Gases: <br> 
+                            <span class="text-2xl mt-2 block">$$ Ma = \frac{V}{c} < 0.3 $$</span>
                         </div>
                     </div>
                     <div>
-                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Mach_Number_Flow_Regimes.png?raw=true" alt="Regímenes Mach"></div><figcaption>Fig 2.1: Regímenes según Mach.</figcaption></figure>
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/Mach_Number_Flow_Regimes.png?raw=true" alt="Regímenes Mach"></div><figcaption>Fig 2.1: Regímenes de flujo según el Número de Mach.</figcaption></figure>
                     </div>
                 </div>
+
+                <!-- Ejemplo Restaurado Completo -->
+                <div class="space-y-6 mb-8">
+                    <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all">
+                        <summary class="flex justify-between items-center p-5 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                            <div class="flex items-center gap-4"><span class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold">EJEMPLO 2</span><span class="font-bold text-slate-800 text-lg">Aerodinámica de Vuelo Comercial</span></div>
+                            <span class="text-slate-400 transform group-open:rotate-180 transition-transform">▼</span>
+                        </summary>
+                        <div class="p-6 border-t border-slate-100">
+                            <p class="italic mb-4 bg-slate-50 p-4 rounded border-l-4 border-emerald-500 text-slate-700">
+                                Un avión comercial vuela a una velocidad crucero de <strong>150 m/s</strong>. A la altitud de vuelo, la temperatura del aire es baja y la velocidad del sonido se reduce a <strong>340 m/s</strong>. ¿Puede el ingeniero aerodinámico utilizar las ecuaciones simplificadas de flujo incompresible (Bernoulli simple) para modelar el aire alrededor de las alas?
+                            </p>
+                            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 text-center">
+                                <div class="math-display">$$ Ma = \frac{150}{340} \approx 0.44 $$</div>
+                                <div class="mt-3 p-3 bg-red-50 border border-red-200 rounded text-red-800 font-bold">
+                                    Conclusión: Como $0.44 > 0.3$, el flujo es COMPRESIBLE. <br>
+                                    El uso de ecuaciones incompresibles generaría errores graves (>5%) en el cálculo de sustentación.
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+
                 <div class="resource-box">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
-                    <div class="grid md:grid-cols-2 gap-3">
-                        <a href="https://www.youtube.com/watch?v=FERCAWBqDaE" target="_blank" class="external-link">📺 Video: Mach Number and Compressibility</a>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <a href="https://www.youtube.com/watch?v=FERCAWBqDaE" target="_blank" class="external-link">📺 Video: Mach Number and Compressibility explained</a>
                         <a href="https://www.youtube.com/watch?v=iMPFN3rLIr8" target="_blank" class="external-link">📺 Video: Basics of Compressible Flow</a>
                     </div>
                 </div>
             </section>
 
             <!-- 3. VISCOSIDAD -->
-            <section id="viscosity" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
-                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 3</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Viscosidad Absoluta</h2></div>
+            <section id="viscosity" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Módulo 3</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Viscosidad Absoluta</h2>
                 </header>
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
-                    <div class="space-y-4 text-slate-700">
-                        <p>La viscosidad disminuye con la temperatura en líquidos (índice de viscosidad en aceites). Regla de oro: <strong>Potencia de bombeo $\propto$ Viscosidad</strong>.</p>
+                
+                <div class="grid lg:grid-cols-2 gap-10 mb-10">
+                    <div class="space-y-6 text-slate-700">
+                        <p>Es la medida de la "fricción interna" del fluido. En los líquidos, la viscosidad disminuye drásticamente al aumentar la temperatura, lo cual es crítico para seleccionar aceites de motor. Una regla de oro en sistemas de bombeo es:</p>
+                        <div class="bg-white p-5 rounded border border-slate-200 text-center shadow-sm">
+                            <span class="text-xs uppercase font-bold text-slate-400 block mb-2">Relación Energética</span>
+                            <div class="math-display">$$ Potencia_{bombeo} \propto \mu $$</div>
+                            <p class="text-sm text-slate-500 mt-2">A mayor viscosidad, mayor consumo de energía eléctrica en la bomba.</p>
+                        </div>
                         <div class="chart-wrapper"><canvas id="rheogramChart"></canvas></div>
                     </div>
-                    <div class="flex flex-col gap-4">
-                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/SIGAUS_aceite.jpg?raw=true" alt="Aceite Motor"></div><figcaption>Fig 3.1: Aceites multigrado.</figcaption></figure>
+                    <div class="flex flex-col gap-6">
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/SIGAUS_aceite.jpg?raw=true" alt="Aceite Motor"></div><figcaption>Fig 3.1: Aceites multigrado (e.g. 10W-30) diseñados para mantener viscosidad estable.</figcaption></figure>
                     </div>
                 </div>
+
+                <!-- Ejemplo Restaurado Completo -->
+                <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-8">
+                    <summary class="flex justify-between items-center p-5 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                        <div class="flex items-center gap-4"><span class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold">EJEMPLO 4</span><span class="font-bold text-slate-800 text-lg">Cálculo de Esfuerzo Cortante</span></div>
+                        <span class="text-slate-400 transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="p-6 border-t border-slate-100">
+                        <p class="italic mb-4 bg-slate-50 p-4 rounded border-l-4 border-emerald-500 text-slate-700">
+                            Un eje de acero se mueve linealmente a una velocidad de <strong>2 m/s</strong> dentro de una camisa. El espacio entre el eje y la camisa está lleno con una película de aceite de <strong>0.5 mm</strong> de espesor y viscosidad dinámica <strong>0.05 Pa·s</strong>. Calcule el esfuerzo cortante ($\tau$) que se opone al movimiento.
+                        </p>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 text-center">
+                            <p class="mb-2 text-left text-sm">Gradiente de velocidad: $du/dy = 2 / 0.0005 = 4000 \, s^{-1}$.</p>
+                            <div class="math-display">$$ \tau = \mu \frac{du}{dy} = 0.05 \times 4000 = 200 \, Pa $$</div>
+                        </div>
+                    </div>
+                </details>
+
                 <div class="resource-box">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
-                    <div class="grid md:grid-cols-2 gap-3">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
                         <a href="https://www.youtube.com/watch?v=u5_LtYBg6Ag" target="_blank" class="external-link">📺 Video: Viscosity & Non-Newtonian Fluids</a>
                         <a href="https://www.youtube.com/watch?v=dfVbWfhPQ3Y" target="_blank" class="external-link">📺 Video: Visual Experiments on Viscosity</a>
                     </div>
@@ -251,30 +354,52 @@
             </section>
 
             <!-- 4. CAPILARIDAD -->
-            <section id="capillarity" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
-                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 4</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Capilaridad</h2></div>
+            <section id="capillarity" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Módulo 4</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Capilaridad</h2>
                 </header>
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                
+                <div class="grid lg:grid-cols-2 gap-10 mb-10">
                     <div class="text-slate-700">
-                        <p>Fenómeno regido por la tensión superficial. Es crítico en <strong>Ingeniería de Petróleos</strong> para entender la migración de crudo a través de los poros microscópicos de las rocas sedimentarias.</p>
-                        <div class="bg-white p-3 rounded border border-slate-200 shadow-sm my-3"><div class="math-display">$$ h = \frac{2 \sigma \cos \theta}{\gamma r} $$</div></div>
+                        <p>Fenómeno de ascenso o descenso de líquidos en tubos finos, causado por la tensión superficial ($\sigma$).</p>
+                        <p><strong>Aplicación en Ingeniería de Petróleos:</strong> Este concepto es vital para entender la recuperación de hidrocarburos. El petróleo se encuentra atrapado en los poros microscópicos de las rocas sedimentarias y se mueve impulsado por la <strong>presión capilar</strong>, desplazando al agua connata.</p>
+                        <div class="bg-white p-5 rounded border border-slate-200 shadow-sm my-5"><div class="math-display">$$ h = \frac{2 \sigma \cos \theta}{\gamma r} $$</div></div>
                     </div>
                     <div>
                          <figure>
-                            <div class="bg-white border border-slate-300 rounded-lg h-[220px] flex items-end justify-center gap-4 pb-0 relative overflow-hidden shadow-inner">
+                            <div class="bg-white border border-slate-300 rounded-lg h-[240px] flex items-end justify-center gap-6 pb-0 relative overflow-hidden shadow-inner">
                                 <div class="flex flex-col items-center justify-end h-full w-8 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">fino</div><div class="w-3 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[80%] opacity-80"></div></div></div>
                                 <div class="flex flex-col items-center justify-end h-full w-10 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">medio</div><div class="w-6 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[40%] opacity-80"></div></div></div>
                                 <div class="flex flex-col items-center justify-end h-full w-14 z-10"><div class="w-full text-[9px] text-center mb-1 text-slate-500">ancho</div><div class="w-10 h-[85%] border-x border-slate-400 bg-blue-50 relative"><div class="absolute bottom-0 w-full bg-blue-500 h-[15%] opacity-80"></div></div></div>
                                 <div class="absolute bottom-0 w-full h-5 bg-blue-500 opacity-80 z-0"></div>
                             </div>
-                            <figcaption>Fig 4.1: Capilaridad vs Diámetro.</figcaption>
+                            <figcaption>Fig 4.1: A menor diámetro de poro/tubo, mayor es el ascenso capilar.</figcaption>
                         </figure>
                     </div>
                 </div>
+
+                <!-- Ejemplo Restaurado Completo -->
+                <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-8">
+                    <summary class="flex justify-between items-center p-5 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                        <div class="flex items-center gap-4"><span class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold">EJEMPLO 5</span><span class="font-bold text-slate-800 text-lg">Error de Lectura en Manómetro</span></div>
+                        <span class="text-slate-400 transform group-open:rotate-180 transition-transform">▼</span>
+                    </summary>
+                    <div class="p-6 border-t border-slate-100">
+                        <p class="italic mb-4 bg-slate-50 p-4 rounded border-l-4 border-emerald-500 text-slate-700">
+                            Para medir el nivel de un tanque de agua, se instala un tubo de vidrio externo (piezómetro) de <strong>1 mm de diámetro</strong>. Debido a la capilaridad, el agua sube por el vidrio más allá del nivel real del líquido dentro del tanque, falseando la medición. Calcule la magnitud de este <strong>error de lectura</strong> (altura extra). (Datos: $\sigma=0.073 N/m$).
+                        </p>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 text-center">
+                            <p class="mb-2 text-left text-sm">Radio $r = 0.5 mm = 0.0005 m$.</p>
+                            <div class="math-display">$$ h = \frac{2(0.073)(1)}{9790(0.0005)} \approx 0.0298 \, m $$</div>
+                            <p class="mt-3 text-emerald-800 font-bold">Error: El instrumento marca +2.98 cm por encima del nivel real.</p>
+                        </div>
+                    </div>
+                </details>
+
                 <div class="resource-box">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
-                    <div class="grid md:grid-cols-2 gap-3">
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
                         <a href="https://www.youtube.com/watch?v=wFL-MH5RZoI" target="_blank" class="external-link">📺 Video: Capillary Pressure in Reservoirs</a>
                         <a href="https://www.youtube.com/watch?v=-BwdFd2ViAw" target="_blank" class="external-link">📺 Video: Capillarity Explained Simply</a>
                     </div>
@@ -282,85 +407,93 @@
             </section>
 
             <!-- 5. PRESIÓN DE VAPOR -->
-            <section id="vapor" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3 flex justify-between items-end">
-                    <div><span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Módulo 5</span><h2 class="text-2xl text-slate-800 font-bold serif-font">Presión de Vapor</h2></div>
+            <section id="vapor" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Módulo 5</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Presión de Vapor</h2>
                 </header>
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
-                    <div class="flex flex-col gap-4">
-                        <div class="text-slate-700 text-sm">
-                            <p>Indica la tendencia a evaporarse. <strong>Volátiles</strong> (alta $P_v$, ej. gasolina) vs <strong>No Volátiles</strong> (baja $P_v$, ej. aceites).</p>
+                
+                <div class="grid lg:grid-cols-2 gap-10 mb-10">
+                    <div class="flex flex-col gap-6">
+                        <div class="text-slate-700 text-base">
+                            <p>Es la presión a la cual un líquido hierve a una temperatura dada. Clasificación:</p>
+                            <ul class="list-disc list-inside mt-3 pl-2">
+                                <li><strong>Líquidos Volátiles:</strong> Tienen alta $P_v$ (ej. Gasolina, Acetona). Se evaporan fácilmente.</li>
+                                <li><strong>Líquidos No Volátiles:</strong> Tienen baja $P_v$ (ej. Mercurio, Aceites).</li>
+                            </ul>
                         </div>
                         <div class="chart-wrapper"><canvas id="vaporChart"></canvas></div>
                     </div>
-                    <div class="flex flex-col gap-4">
-                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/CENTRIPUMP.jpg?raw=true" alt="Daño por Cavitación"></div><figcaption>Fig 5.1: Daño por cavitación.</figcaption></figure>
-                        <div class="bg-red-50 border border-red-200 p-4 rounded-lg shadow-sm">
-                            <h4 class="font-bold text-red-800 mb-1 text-sm">Riesgo: Cavitación</h4>
-                            <p class="text-sm text-red-900 leading-relaxed text-left">Implosión violenta de burbujas cuando $P_{local} < P_v$.</p>
+                    <div class="flex flex-col gap-6">
+                        <figure><div class="img-box bg-white"><img src="https://github.com/Juansanher25/fluidproperties/blob/main/CENTRIPUMP.jpg?raw=true" alt="Daño por Cavitación"></div><figcaption>Fig 5.1: Impulsor destruido por cavitación.</figcaption></figure>
+                        <div class="bg-red-50 border border-red-200 p-5 rounded-lg shadow-sm">
+                            <h4 class="font-bold text-red-800 mb-2 text-sm">Riesgo Crítico: Cavitación</h4>
+                            <p class="text-sm text-red-900 leading-relaxed text-left">
+                                Si la presión en la succión cae por debajo de la presión de vapor ($P < P_v$), el líquido hierve frío. Las burbujas formadas colapsan violentamente al entrar al impulsor, arrancando material metálico (pitting).
+                            </p>
                         </div>
                     </div>
                 </div>
-                 <!-- Ejemplo 6 -->
-                 <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all">
-                    <summary class="flex justify-between items-center p-4 cursor-pointer select-none bg-slate-50 hover:bg-slate-100">
-                        <div class="flex items-center gap-3">
-                            <span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[10px] font-bold tracking-wide">EJEMPLO 6</span> 
-                            <span class="font-bold text-slate-800">Diagnóstico de Bomba</span>
-                        </div>
+
+                 <!-- Ejemplo Restaurado Completo -->
+                 <details class="group bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-all mb-8">
+                    <summary class="flex justify-between items-center p-5 cursor-pointer bg-slate-50 hover:bg-slate-100">
+                        <div class="flex items-center gap-4"><span class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold">EJEMPLO 6</span><span class="font-bold text-slate-800 text-lg">Diagnóstico de Operación de Bomba</span></div>
                         <span class="text-slate-400 transform group-open:rotate-180 transition-transform">▼</span>
                     </summary>
-                    <div class="p-5 border-t border-slate-100">
-                        <p class="italic mb-3 bg-slate-50 p-2 rounded border-l-4 border-emerald-500 text-sm">
-                            Bomba operando con agua a <strong>60°C</strong>. Un vacuómetro en la succión marca una presión absoluta de <strong>15 kPa</strong>. ¿Existe riesgo de cavitación?
+                    <div class="p-6 border-t border-slate-100">
+                        <p class="italic mb-4 bg-slate-50 p-4 rounded border-l-4 border-emerald-500 text-slate-700">
+                            Una bomba centrífuga está operando con agua caliente a <strong>60°C</strong> en un proceso industrial. El operador observa que el vacuómetro instalado en la brida de succión marca una presión absoluta de <strong>15 kPa</strong>. ¿Existe riesgo inminente de daño por cavitación?
                         </p>
-                        <div class="bg-slate-50 p-3 rounded border border-slate-200">
-                            <p class="text-sm mb-1 text-left">Consultando la curva: $P_v(60^\circ C) \approx 19.9 \, kPa$.</p>
-                            <div class="math-display">$$ P_{succión} (15) < P_{vapor} (19.9) $$</div>
-                            <p class="mt-2 text-red-700 font-bold text-center text-sm">¡SÍ, RIESGO DE CAVITACIÓN!</p>
+                        <div class="bg-slate-50 p-5 rounded-lg border border-slate-200 text-center">
+                            <p class="text-sm mb-2 text-left">Paso 1: Consultar la curva de saturación. Para $T=60^\circ C \rightarrow P_v \approx 19.9 \, kPa$.</p>
+                            <div class="math-display">$$ P_{succión} (15 \, kPa) < P_{vapor} (19.9 \, kPa) $$</div>
+                            <p class="mt-3 text-red-700 font-bold text-lg">¡SÍ, HAY RIESGO SEVERO DE CAVITACIÓN!</p>
+                            <p class="text-xs text-red-600 mt-1">El agua está hirviendo en la entrada. Se debe aumentar la presión de succión inmediatamente.</p>
                         </div>
                     </div>
                 </details>
+
                 <div class="resource-box">
-                    <h4 class="text-xs font-bold text-slate-500 uppercase mb-2 flex items-center gap-2">📚 Para profundizar:</h4>
-                    <div class="grid md:grid-cols-2 gap-3">
-                        <a href="https://www.youtube.com/watch?v=VBLlBX1uV-o" target="_blank" class="external-link">📺 Video: Understanding Cavitation</a>
+                    <h4 class="text-sm font-bold text-slate-500 uppercase mb-4 flex items-center gap-2">📚 Para profundizar:</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <a href="https://www.youtube.com/watch?v=VBLlBX1uV-o" target="_blank" class="external-link">📺 Video: Understanding Cavitation in Pumps</a>
                         <a href="https://www.youtube.com/watch?v=FeFLDin2uIY" target="_blank" class="external-link">📺 Video: Pump Cavitation Prevention</a>
                     </div>
                 </div>
             </section>
 
             <!-- EVALUACIÓN Y BIBLIO -->
-            <section id="quiz" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3">
-                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-1 block">Evaluación</span>
-                    <h2 class="text-2xl text-slate-800 font-bold serif-font">Cuestionario Final</h2>
+            <section id="quiz" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5">
+                    <span class="text-blue-600 font-bold text-xs uppercase tracking-widest mb-2 block">Evaluación</span>
+                    <h2 class="text-4xl text-slate-800 font-bold serif-font">Cuestionario Final</h2>
                 </header>
-                <div id="quiz-container" class="space-y-3 mb-5"></div>
+                <div id="quiz-container" class="space-y-5 mb-8"></div>
                 <div class="flex gap-4">
-                    <button id="submit-quiz-btn" onclick="submitQuiz()" class="btn-primary shadow-lg px-6">Calificar</button>
-                    <button id="retry-quiz-btn" onclick="initQuiz()" class="hidden bg-slate-200 text-slate-700 px-5 py-2 rounded font-semibold hover:bg-slate-300 transition shadow">Reintentar</button>
+                    <button id="submit-quiz-btn" onclick="submitQuiz()" class="btn-primary shadow-lg px-8 py-3 text-lg">Calificar Examen</button>
+                    <button id="retry-quiz-btn" onclick="initQuiz()" class="hidden bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-semibold hover:bg-slate-300 transition shadow">Intentar de Nuevo</button>
                 </div>
-                <div id="quiz-result" class="hidden mt-5 p-5 bg-emerald-50 rounded-xl text-center border border-emerald-200 shadow-sm">
-                    <div class="text-4xl font-bold text-emerald-600 mb-1 serif-font"><span id="score-val">0</span>/10</div>
-                    <p id="score-msg" class="text-emerald-800 italic text-sm">Feedback...</p>
+                <div id="quiz-result" class="hidden mt-8 p-6 bg-emerald-50 rounded-xl text-center border border-emerald-200 shadow-sm">
+                    <div class="text-5xl font-bold text-emerald-600 mb-2 serif-font"><span id="score-val">0</span>/10</div>
+                    <p id="score-msg" class="text-emerald-800 italic text-lg">Feedback...</p>
                 </div>
             </section>
             
-            <section id="biblio" class="tab-panel">
-                <header class="mb-5 border-b border-slate-300 pb-3"><h2 class="text-2xl text-slate-800 font-bold serif-font">Bibliografía</h2></header>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 text-sm text-slate-700 font-mono space-y-2 shadow-sm">
-                     <p>Cengel, Y. A. (2018). <i>Fluid Mechanics</i>.</p>
-                     <p>Mott, R. L. (2016). <i>Applied Fluid Mechanics</i>.</p>
-                     <p>Fox, R. W. (2020). <i>Intro to Fluid Mechanics</i>.</p>
-                     <p>Sandoval Herrera, J. (2026). <i>Notas de Clase</i>. U. América.</p>
+            <section id="biblio" class="tab-panel content-card">
+                <header class="mb-8 border-b border-slate-300 pb-5"><h2 class="text-4xl text-slate-800 font-bold serif-font">Bibliografía</h2></header>
+                <div class="bg-white p-8 rounded-xl border border-slate-200 text-base text-slate-700 font-mono space-y-4 shadow-sm">
+                     <p>Cengel, Y. A., & Cimbala, J. M. (2018). <i>Fluid Mechanics: Fundamentals and Applications</i> (4th ed.). McGraw-Hill Education.</p>
+                     <p>Mott, R. L., & Untener, J. A. (2016). <i>Applied Fluid Mechanics</i> (7th ed.). Pearson.</p>
+                     <p>Fox, R. W., McDonald, A. T., & Mitchell, P. J. (2020). <i>Fox and McDonald's Introduction to Fluid Mechanics</i> (10th ed.). Wiley.</p>
+                     <p>Sandoval Herrera, J. (2026). <i>Notas de Clase: Mecánica de Fluidos e Hidráulica</i>. Facultad de Ingenierías, Universidad de América.</p>
                 </div>
             </section>
         </div>
     </main>
 
     <script>
-        // --- Navegación con Efecto de Página ---
+        // Navegación
         function navTo(id) {
             document.querySelectorAll('.tab-panel').forEach(p => {
                 p.classList.remove('active');
@@ -388,6 +521,7 @@
             if(rho>0) document.getElementById('result-api').innerText = ((141.5 / (rho/1000)) - 131.5).toFixed(1) + " °";
         }
 
+        // Gráficas
         function getRheogramData() {
             const x = [0,10,20,30,40,50,60,70,80,90,100];
             return {
@@ -428,17 +562,18 @@
             });
         }
 
+        // Quiz Aleatorio
         const qPool = [
-            { q: "Condición Mach flujo incompresible:", opt: ["Ma > 1", "Ma < 0.3", "Ma = 0", "Ma > 0.5"], a: 1 },
-            { q: "Relaciona densidad fluido/agua:", opt: ["Viscosidad", "Peso Esp.", "Gravedad Esp.", "Pv"], a: 2 },
-            { q: "Si P < Pv ocurre:", opt: ["Solidificación", "Densificación", "Cavitación", "Nada"], a: 2 },
-            { q: "Unidad SI viscosidad dinámica:", opt: ["Pa·s", "m²/s", "Poise", "Stoke"], a: 0 },
-            { q: "Fluido dilatante:", opt: ["Visc. cte", "Visc. baja c/corte", "Visc. sube c/corte", "Sin visc."], a: 2 },
-            { q: "Recíproco densidad:", opt: ["API", "Vol. Esp.", "Peso Esp.", "Compresibilidad"], a: 1 },
-            { q: "Fenómeno tubos < 10mm:", opt: ["Turbulencia", "Cavitación", "Capilaridad", "Compresibilidad"], a: 2 },
-            { q: "Esfuerzo cortante prop. a:", opt: ["P", "T", "Gradiente vel.", "Vol"], a: 2 },
-            { q: "A 20°C, mayor visc:", opt: ["Agua", "Mercurio", "Aire", "Glicerina"], a: 3 },
-            { q: "Efecto alta visc en bomba:", opt: ["- Potencia", "+ Potencia", "= Potencia", "+ Flujo"], a: 1 },
+            { q: "Condición Mach para asumir flujo incompresible:", opt: ["Ma > 1", "Ma < 0.3", "Ma = 0", "Ma > 0.5"], a: 1 },
+            { q: "Propiedad que relaciona la densidad de un fluido con la del agua:", opt: ["Viscosidad", "Peso Específico", "Gravedad Específica", "Presión de Vapor"], a: 2 },
+            { q: "Si la presión local cae por debajo de la presión de vapor, ocurre:", opt: ["Solidificación", "Densificación", "Cavitación", "Nada"], a: 2 },
+            { q: "Unidad SI de la viscosidad dinámica:", opt: ["Pa·s", "m²/s", "Poise", "Stoke"], a: 0 },
+            { q: "Fluido cuya viscosidad aumenta con el esfuerzo cortante:", opt: ["Newtoniano", "Pseudoplástico", "Dilatante", "Gas ideal"], a: 2 },
+            { q: "El inverso de la densidad es:", opt: ["Gravedad API", "Volumen Específico", "Peso Específico", "Compresibilidad"], a: 1 },
+            { q: "Fenómeno responsable del error de lectura en tubos de vidrio delgados:", opt: ["Turbulencia", "Cavitación", "Capilaridad", "Compresibilidad"], a: 2 },
+            { q: "Según Newton, el esfuerzo cortante es proporcional a:", opt: ["Presión", "Temperatura", "Gradiente de velocidad", "Volumen"], a: 2 },
+            { q: "A 20°C, ¿cuál fluido tiene mayor viscosidad?", opt: ["Agua", "Mercurio", "Aire", "Glicerina"], a: 3 },
+            { q: "El aumento de viscosidad en una bomba genera:", opt: ["Menos potencia requerida", "Más potencia requerida", "Igual potencia", "Mayor flujo"], a: 1 },
         ];
         
         let currQ = [];
@@ -448,24 +583,19 @@
             document.getElementById('submit-quiz-btn').classList.remove('hidden');
             document.getElementById('retry-quiz-btn').classList.add('hidden');
             
-            // 1. Mezclar Preguntas
             currQ = [...qPool].sort(()=>0.5-Math.random()).slice(0,10);
             
             currQ.forEach((q,i) => {
                 const d = document.createElement('div');
-                d.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm";
-                
-                // 2. Mezclar Opciones
-                let indices = q.opt.map((_, idx) => idx); // [0, 1, 2, 3]
-                indices.sort(() => 0.5 - Math.random()); // Mezclar índices
+                d.className = "bg-white p-5 rounded-lg border border-slate-200 shadow-sm";
+                let indices = q.opt.map((_, idx) => idx);
+                indices.sort(() => 0.5 - Math.random());
                 
                 let optionsHTML = '';
                 indices.forEach(k => {
-                    // El valor del input (k) es el índice original, así que la validación sigue funcionando
-                    optionsHTML += `<label class="flex items-center gap-3 mt-2 cursor-pointer p-2 hover:bg-slate-50 rounded"><input type="radio" name="q${i}" value="${k}" class="w-4 h-4 accent-blue-600"> <span>${q.opt[k]}</span></label>`;
+                    optionsHTML += `<label class="flex items-center gap-3 mt-3 cursor-pointer p-2 hover:bg-slate-50 rounded"><input type="radio" name="q${i}" value="${k}" class="w-5 h-5 accent-blue-600"> <span class="text-base">${q.opt[k]}</span></label>`;
                 });
-                
-                d.innerHTML = `<p class="font-bold text-base mb-2">${i+1}. ${q.q}</p>${optionsHTML}<div id="fb-q${i}" class="hidden mt-3 p-2 rounded font-bold text-center text-sm"></div>`;
+                d.innerHTML = `<p class="font-bold text-lg mb-3">${i+1}. ${q.q}</p>${optionsHTML}<div id="fb-q${i}" class="hidden mt-4 p-3 rounded font-bold text-center text-sm"></div>`;
                 c.appendChild(d);
             });
         }
@@ -476,14 +606,10 @@
                 const s = document.querySelector(`input[name="q${i}"]:checked`);
                 const f = document.getElementById(`fb-q${i}`); f.classList.remove('hidden');
                 document.querySelectorAll(`input[name="q${i}"]`).forEach(inp=>inp.disabled=true);
-                
                 if(s && +s.value === q.a) { 
-                    sc++; 
-                    f.className="bg-emerald-100 text-emerald-800"; 
-                    f.innerText="✓ Correcto"; 
+                    sc++; f.className="bg-emerald-100 text-emerald-800"; f.innerText="✓ Correcto"; 
                 } else { 
-                    f.className="bg-red-100 text-red-800"; 
-                    f.innerText=`✗ Incorrecto. Resp: ${q.opt[q.a]}`; 
+                    f.className="bg-red-100 text-red-800"; f.innerText=`✗ Incorrecto. La respuesta correcta era: ${q.opt[q.a]}`; 
                 }
             });
             document.getElementById('score-val').innerText = sc;
